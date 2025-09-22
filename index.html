@@ -6,6 +6,16 @@
 <title>The Spelling Wheel</title>
 <link rel="icon" type="image/ico" href="icon.ico" />
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SDCZLM9ZGR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SDCZLM9ZGR');
+</script>
+
 <!-- 👇 Add these two lines here -->
 <link rel="manifest" href="manifest.json" />
 <script>
@@ -840,28 +850,39 @@ setTimeout(loadVoices, 200);
     };
 
     async function getDefinition(word) {
-      const lower = word.toLowerCase();
+  const lower = word.toLowerCase();
 
-      // 1. Check local dictionary
-      if (localDictionary[lower]) {
-        return localDictionary[lower];
-      }
+  // 1. Check local dictionary
+  if (localDictionary[lower]) {
+    return localDictionary[lower];
+  }
 
-      // 2. Check localStorage cache
-      let cached = localStorage.getItem("dict_" + lower);
-      if (cached) return cached;
+  // 2. Check localStorage cache
+  let cached = localStorage.getItem("dict_" + lower);
+  if (cached) return cached;
 
-      // 3. Try online fetch
-      try {
-        let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${lower}`);
-        let data = await res.json();
-        let def = data[0]?.meanings[0]?.definitions[0]?.definition || "Definition not found.";
-        localStorage.setItem("dict_" + lower, def); // cache result
-        return def;
-      } catch (e) {
-        return "No definition available (offline).";
-      }
+  // 3. Try online fetch
+  try {
+    let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${lower}`);
+    let data = await res.json();
+
+    if (Array.isArray(data) && data[0]?.meanings?.length > 0) {
+      let meaning = data[0].meanings[0];
+      let partOfSpeech = meaning.partOfSpeech || "";
+      let def = meaning.definitions[0]?.definition || "Definition not found.";
+
+      // Format: part of speech + definition
+      let formatted = `${partOfSpeech.toUpperCase()}: ${def}`;
+
+      localStorage.setItem("dict_" + lower, formatted);
+      return formatted;
     }
+
+    return "Definition not found.";
+  } catch (e) {
+    return "No definition available (offline).";
+  }
+}
 
     // Event listeners for definition buttons
     document.addEventListener("DOMContentLoaded", () => {
@@ -901,6 +922,25 @@ setTimeout(loadVoices, 200);
         });
       }
     });
+
+// Detect if device is mobile
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// Remove UK Female voice option on mobile devices
+document.addEventListener("DOMContentLoaded", () => {
+  if (isMobileDevice()) {
+    const voiceSelect = document.getElementById("voiceSelect");
+    const option = voiceSelect.querySelector('option[value="ukFemale"]');
+    if (option) {
+      option.remove();
+
+      // ✅ Also set default to US Female if UK Female was removed
+      voiceSelect.value = "usFemale";
+    }
+  }
+});
 
 </script>
 
