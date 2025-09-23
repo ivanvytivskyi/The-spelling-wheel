@@ -126,8 +126,8 @@ select {
 /* Style only those two buttons inside .definition-buttons */
 .definition-buttons .green-btn {
   flex: 0 1 auto;
-  max-width: 160px;
-  padding: 10px 14px;
+  max-width: 168px;
+  padding: 10px 10px;
   font-size: 15px;
   white-space: nowrap;
 }
@@ -176,7 +176,14 @@ select {
   li button { background: red; color: white; padding: 2px 6px; font-size: 12px; margin-left: 8px; }
   #wordCountLabel { font-weight: bold; color: #333; margin-top: 5px; display: block; font-size: 14px; }
   #categoryCountLabel { font-weight: bold; color: #666; margin-top: 5px; display: block; font-size: 12px; }
-  .developer-info { position: fixed; bottom: 10px; center: 15px; font-size: 14px; color: #333; }
+  .developer-info {
+  position: bottom;
+  bottom: 30px;
+  center: 15px;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 35px;
+}
   .developer-info a { color: #007BFF; text-decoration: none; margin-left: 5px; cursor: pointer; }
   .developer-info a:hover { text-decoration: underline; }
 
@@ -187,7 +194,7 @@ select {
     text-align: left; position: relative; max-height: 75%; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     display: flex; flex-direction: column; align-items: center;
   }
-  .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; font-weight: bold; cursor: pointer; color: #333; }
+  .close-btn { position: absolute; top: 15px; right: 20px; font-size: 30px; font-weight: bold; cursor: pointer; color: #333; }
   .close-btn:hover { color: red; }
   .modal-box h2 { text-align: center; margin-top: 0; }
   .modal-content { display: flex; gap: 20px; margin-top: 15px; align-items: flex-start; }
@@ -219,6 +226,16 @@ select {
   font-size: 14px;
 }
 
+#minutesInput,
+#secondsInput {
+  width: 55px;        
+  height: 35px;       
+  font-size: 20px;    
+  text-align: center; 
+  border: 2px solid #007bff;
+  border-radius: 8px;
+}
+
 </style>
 </head>
 <body>
@@ -233,6 +250,11 @@ select {
   <button class="green-btn" id="addDefBtn">✍️ Add/Edit Definition</button>
 </div>
 <div id="definitionBox" style="margin-top:10px; font-size:16px; color:#333; font-style:italic;">
+</div>
+<div id="cambridgeLink" style="margin-top:5px; display:none;">
+  <a href="#" target="_blank" style="color:#007BFF; text-decoration:underline;">
+    📖 See full definition on Cambridge
+  </a>
 </div>
 
 
@@ -287,20 +309,16 @@ select {
     </details>
   </div>
 
-  <div class="developer-info">
-    Developed by Ivan Vytivskyi | <a id="aboutLink">ℹ️ About</a>
-  </div>
-
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-box">
-      <span class="close-btn" id="closeModal">&times;</span>
+      <span class="close-btn" id="closeModal">&times;</span><br>
       <h2>✨ About Ivan Vytivskyi</h2>
         <div style="display: flex; flex-direction: column; align-items: center; text-align: justify;">
   <img src="ivan.jpg" alt="Ivan" style="max-width: 250px; border-radius: 12px; margin-bottom: 15px;" />
   <div>
     <p > 
 I am Ivan Vytivskyi, from a small village in Ukraine called Haivshchyna.
-I created this app, Ivan’s Spelling Wheel, while learning English from scratch.
+I created this app, Ivan’s "The Spelling Wheel", while learning English from scratch.
 </p>
 <p> 
 Spelling has always been the hardest part of learning English for me.
@@ -312,7 +330,7 @@ hiring teachers (but lessons were too expensive), even making a box of flashcard
 I needed a better solution: something that could say the word aloud so I could write it down, and then show the correct spelling afterwards.
 </p>
 <p>
-That’s why I built this app — Ivan’s Spelling Wheel.
+That’s why I built this app — Ivan’s "The Spelling Wheel".
 It’s simple and easy to use: you spin the wheel, listen to the voice, write the word, and check if you spelled it correctly.
 </p>
 <p>
@@ -322,8 +340,7 @@ I hope this tool helps other English learners just like it’s helping me.
   </div>
 </div>
 </div>
-
-      </div>
+</div>
     
   
 
@@ -539,6 +556,7 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
 
           // Clear old definition after spin
           document.getElementById("definitionBox").innerText = "";
+          document.getElementById("cambridgeLink").style.display = "none";
 
 
 
@@ -815,6 +833,122 @@ setTimeout(loadVoices, 200);
       window.onclick = (event) => { if (event.target === modalOverlay) { modalOverlay.style.display = 'none'; } };
     });
 
+// === ENHANCED DICTIONARY SYSTEM ===
+
+// Fetch definition from online API
+async function fetchDefinition(word) {
+  try {
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+    const data = await response.json();
+
+    if (Array.isArray(data) && data[0]?.meanings?.length > 0) {
+      const meaning = data[0].meanings[0];
+      const partOfSpeech = meaning.partOfSpeech || "";
+      const definition = meaning.definitions[0].definition || "No definition found.";
+      return `${partOfSpeech ? partOfSpeech + ": " : ""}${definition}`;
+    } else {
+      return "No definition found.";
+    }
+  } catch (err) {
+    return "⚠️ Could not fetch definition (offline?).";
+  }
+}
+
+// Get definition (custom first → online)
+async function getDefinition(word) {
+  if (!word) return "Spin the wheel first!";
+  let customDef = localStorage.getItem("customDef_" + word.toLowerCase());
+  if (customDef) return customDef;
+  return await fetchDefinition(word);
+}
+
+// Reset definition UI after each spin
+function resetDefinitionUI() {
+  document.getElementById("definitionBox").innerText = "";
+  document.getElementById("cambridgeLink").style.display = "none";
+  const defBtn = document.getElementById("showDefBtn");
+  if (defBtn) defBtn.textContent = "📖 Show Definition";
+}
+
+// Attach button events
+document.addEventListener("DOMContentLoaded", () => {
+  const defBtn = document.getElementById("showDefBtn");
+  const addBtn = document.getElementById("addDefBtn");
+  const box = document.getElementById("definitionBox");
+  const linkBox = document.getElementById("cambridgeLink");
+
+  let definitionVisible = false;
+
+  if (defBtn) {
+    defBtn.addEventListener("click", async () => {
+      if (!selectedWord) {
+        box.innerText = "Spin the wheel first!";
+        linkBox.style.display = "none";
+        return;
+      }
+
+      if (!definitionVisible) {
+        box.innerText = "Loading definition...";
+        const def = await getDefinition(selectedWord);
+        box.innerText = def;
+
+        const link = linkBox.querySelector("a");
+        link.href = `https://dictionary.cambridge.org/dictionary/english/${selectedWord}`;
+        linkBox.style.display = "block";
+
+        defBtn.textContent = "🙈 Hide Definition";
+        definitionVisible = true;
+      } else {
+        box.innerText = "";
+        linkBox.style.display = "none";
+        defBtn.textContent = "📖 Show Definition";
+        definitionVisible = false;
+      }
+    });
+  }
+
+  if (addBtn) {
+    addBtn.addEventListener("click", async () => {
+      if (!selectedWord) {
+        box.innerText = "Spin the wheel first!";
+        return;
+      }
+
+      let existing = localStorage.getItem("customDef_" + selectedWord.toLowerCase()) || "";
+      const newDef = await customPrompt(
+        `Enter your own definition for "${selectedWord}" (💡 Tip: For better results, check Cambridge Dictionary). Leave empty to delete your custom definition:`,
+        existing
+      );
+
+      if (newDef && newDef.trim() !== "") {
+        localStorage.setItem("customDef_" + selectedWord.toLowerCase(), newDef.trim());
+        box.innerText = newDef.trim();
+        showMessage(`✅ Saved your definition for "${selectedWord}"`, "success");
+        addBtn.textContent = "✏️ Edit Definition";
+      } else {
+        localStorage.removeItem("customDef_" + selectedWord.toLowerCase());
+        box.innerText = "";
+        showMessage(`🗑️ Custom definition for "${selectedWord}" removed.`, "warning");
+        addBtn.textContent = "✍️ Add Definition";
+      }
+    });
+  }
+
+  // Update add/edit button when word changes
+  const originalSpinArrow = spinArrow;
+  spinArrow = function() {
+    originalSpinArrow();
+    resetDefinitionUI();
+
+    if (addBtn) {
+      const customDef = localStorage.getItem("customDef_" + (selectedWord || "").toLowerCase());
+      addBtn.textContent = customDef ? "✏️ Edit Definition" : "✍️ Add Definition";
+    }
+  };
+});
+
+
+
     // Study timer
     let timerInterval;
     let remainingSeconds = 0;
@@ -849,89 +983,10 @@ setTimeout(loadVoices, 200);
     secondsInput.value = "0";
   }
 }
-    // Local dictionary
-    const localDictionary = {
-      "achieve": "To successfully reach a goal through effort.",
-      "necessary": "Something that must be done or present.",
-      "opportunity": "A chance to do something.",
-      "knowledge": "Information, skills, and understanding gained through learning or experience.",
-      "experience": "Practical contact with and observation of facts or events."
-    };
-
-    async function getDefinition(word) {
-  const lower = word.toLowerCase();
-
-  // 1. Check local dictionary
-  if (localDictionary[lower]) {
-    return localDictionary[lower];
-  }
-
-  // 2. Check localStorage cache
-  let cached = localStorage.getItem("dict_" + lower);
-  if (cached) return cached;
-
-  // 3. Try online fetch
-  try {
-    let res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${lower}`);
-    let data = await res.json();
-
-    if (Array.isArray(data) && data[0]?.meanings?.length > 0) {
-      let meaning = data[0].meanings[0];
-      let partOfSpeech = meaning.partOfSpeech || "";
-      let def = meaning.definitions[0]?.definition || "Definition not found.";
-
-      // Format: part of speech + definition
-      let formatted = `${partOfSpeech.toUpperCase()}: ${def}`;
-
-      localStorage.setItem("dict_" + lower, formatted);
-      return formatted;
-    }
-
-    return "Definition not found.";
-  } catch (e) {
-    return "No definition available (offline).";
-  }
-}
-
-    // Event listeners for definition buttons
-    document.addEventListener("DOMContentLoaded", () => {
-      const defBtn = document.getElementById("showDefBtn");
-      const addBtn = document.getElementById("addDefBtn");
-
-      if (defBtn) {
-        defBtn.addEventListener("click", () => {
-          if (!selectedWord) {
-            document.getElementById("definitionBox").innerText = "Spin the wheel first!";
-            return;
-          }
-          getDefinition(selectedWord).then(def => {
-            document.getElementById("definitionBox").innerText = def;
-          });
-        });
-      }
-
-      if (addBtn) {
-        addBtn.addEventListener("click", () => {
-          if (!selectedWord) {
-            document.getElementById("definitionBox").innerText = "Spin the wheel first!";
-            return;
-          }
-          customPrompt("Enter a definition for: " + selectedWord + " (💡 Tip: copy from Cambridge Dictionary for best quality)", "").then(newDef => {
-          if (newDef && newDef.trim() !== "") {
-            localStorage.setItem("dict_" + selectedWord.toLowerCase(), newDef.trim());
-            document.getElementById("definitionBox").innerText = newDef.trim();
-            showMessage(`✅ Custom definition saved for "${selectedWord}"`, "success");
-          }
-        });
-          if (newDef && newDef.trim() !== "") {
-            localStorage.setItem("dict_" + selectedWord.toLowerCase(), newDef.trim());
-            document.getElementById("definitionBox").innerText = newDef.trim();
-            showMessage(`✅ Custom definition saved for "${selectedWord}"`, "success");
-          }
-        });
-      }
-    });
-
+    
+// (Old dictionary removed here)
+    
+    
 // Detect if device is mobile
 function isMobileDevice() {
   return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -953,7 +1008,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
-  <div style="margin: 20px auto; max-width: 220px; text-align: center; background: #fffbea; border: 1px solid #f4a460; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 14px;">
+  <div style="margin: 15px auto; max-width: 220px; text-align: center; background: #fffbea; border: 1px solid #f4a460; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 14px;">
     <h4 style="margin: 5px 0;">⏱ Study Timer</h4>
     <div style="margin-bottom: 8px;">
       <input id="minutesInput" type="number" min="0" max="59" value="0">
@@ -964,6 +1019,10 @@ document.addEventListener("DOMContentLoaded", () => {
   <button class="red-btn" onclick="stopTimer()">⏹ Stop</button>
 </div>
    </div>
+
+<div class="developer-info">
+    ℹ️ About| Developed by<a id="aboutLink"> Ivan Vytivskyi </a>
+  </div>
 
   <audio id="timerSound">
     <source src="sound/bell.mp3" />
