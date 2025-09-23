@@ -16,6 +16,16 @@
   gtag('config', 'G-SDCZLM9ZGR');
 </script>
 
+<script>
+  // Send heartbeat every 30 seconds so GA knows user is still active
+  setInterval(() => {
+    gtag('event', 'heartbeat', {
+      event_category: 'engagement',
+      event_label: 'active_user'
+    });
+  }, 30000); // 30s
+</script>
+
 <!-- 👇 Add these two lines here -->
 <link rel="manifest" href="manifest.json" />
 <script>
