@@ -17,13 +17,12 @@
 </script>
 
 <script>
-  // Send heartbeat every 30 seconds so GA knows user is still active
+  // Send GA4 "user_engagement" event every 15 seconds
   setInterval(() => {
-    gtag('event', 'heartbeat', {
-      event_category: 'engagement',
-      event_label: 'active_user'
+    gtag('event', 'user_engagement', {
+      engagement_time_msec: 15000  // GA expects milliseconds
     });
-  }, 30000); // 30s
+  }, 15000); // 15s
 </script>
 
 <!-- 👇 Add these two lines here -->
