@@ -242,7 +242,7 @@ select {
  <!-- Row 1: No Repeat + Spin side by side -->
 <div class="control-row" style="justify-content: center; gap: 10px;">
   <button class="teal-btn" id="toggleNonRepeatingMode" onclick="toggleNonRepeating()">No Repeat: <span id="nonRepeatStatus">OFF</span></button>
-  <button class="blue-btn" id="spinButton" onclick="spinArrow()">🎯 SPIN!</button>
+  <button class="blue-btn" id="spinButton" onclick="spinArrow(); trackSpinClick()">🎯 SPIN!</button>
 </div>
 
 <!-- Row 2: Voice selector centered -->
@@ -978,6 +978,13 @@ document.addEventListener("DOMContentLoaded", () => {
 <button id="promptCancel" class="red-btn">❌ Cancel</button>
   </div>
 </div>
-
+<script>
+  function trackSpinClick() {
+    gtag('event', 'spin_button_click', {
+      event_category: 'interaction',
+      event_label: 'Spin button pressed'
+    });
+  }
+</script>
 </body>
 </html>
