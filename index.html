@@ -176,11 +176,7 @@ select {
   li button { background: red; color: white; padding: 2px 6px; font-size: 12px; margin-left: 8px; }
   #wordCountLabel { font-weight: bold; color: #333; margin-top: 5px; display: block; font-size: 14px; }
   #categoryCountLabel { font-weight: bold; color: #666; margin-top: 5px; display: block; font-size: 12px; }
-  .developer-info {
-  position: bottom;
-  bottom: 30px;
-  center: 15px;
-  font-size: 18px;
+  .developer-info {bottom: 30px;font-size: 18px;
   color: #333;
   margin-bottom: 35px;
 }
@@ -204,12 +200,6 @@ select {
   .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
   .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
   .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
-
-.timer-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
 .timer-buttons {
   display: flex;
@@ -239,8 +229,18 @@ select {
 </style>
 </head>
 <body>
-  <h1>🎯The Spelling Wheel✨</h1>
+  <!-- 🌍 Language switcher -->
+<div style="margin: 10px 0;">
+  <label for="languageSwitcher">🌍 Language:</label>
+  <select id="languageSwitcher" onchange="setLanguage(this.value)">
+    <option value="en">🇬🇧 English</option>
+    <option value="uk">🇺🇦 Українська</option>
+    <option value="hi">🇮🇳 हिन्दी</option>
+  </select>
+</div>
+<h1>🎯The Spelling Wheel✨</h1>
 
+  
   <canvas id="wheelCanvas" width="300" height="300"></canvas>
 
   <div id="answerDisplay">Spin the wheel to see the word here!</div>
@@ -262,7 +262,7 @@ select {
 
  <!-- Row 1: No Repeat + Spin side by side -->
 <div class="control-row" style="justify-content: center; gap: 10px;">
-  <button class="teal-btn" id="toggleNonRepeatingMode" onclick="toggleNonRepeating()">No Repeat: <span id="nonRepeatStatus">OFF</span></button>
+  <button class="teal-btn" id="toggleNonRepeatingMode" onclick="toggleNonRepeating()"><span id="nonRepeatStatus"></span></button>
   <button class="blue-btn" id="spinButton" onclick="spinArrow(); trackSpinClick()">🎯 SPIN!</button>
 </div>
 
@@ -287,7 +287,7 @@ select {
 </div>
 
   <div class="dropdown-section">
-    <label for="categorySelect">📂 Category:</label>
+    <label id="categoryLabel" for="categorySelect">📂 Category:</label>
     <select id="categorySelect"></select>
     <span id="wordCountLabel">Words: 0/50</span>
     <span id="categoryCountLabel">Categories: 0/50</span>
@@ -303,7 +303,7 @@ select {
 
   <div class="dropdown-section">
     <details>
-      <summary>📂 Manage Words</summary>
+      <summary id="manageWordsLabel">📂 Manage Words</summary>
       <input type="text" id="newWordInput" placeholder="Add word(s), separated by commas — then press Enter" />
       <ul id="wordList"></ul>
     </details>
@@ -345,6 +345,158 @@ I hope this tool helps other English learners just like it’s helping me.
   
 
   <script>
+
+let currentLang = "en";
+
+ const translations = {
+    en: {
+      spin: "🎯 SPIN!",
+      noRepeatOn: "No Repeat: ON",
+      noRepeatOff: "No Repeat: OFF",
+      addCategory: "➕ Add Category",
+      deleteCategory: "✖ Delete Category",
+      speed: "⏩ Speed:",
+      reset: "🔄 RESET",
+      showDefinition: "📖 Show Definition",
+      hideDefinition: "🙈 Hide Definition",
+      addDefinition: "✍️ Add Definition",
+      editDefinition: "✏️ Edit Definition",
+      category: "📂 Category",
+      manageWords: "📂 Manage Words",
+      words: "Words",
+      categories: "Categories",
+      customDefPrompt: `Enter your own definition for "{word}" (💡 Tip: For better results, check Cambridge Dictionary). Leave empty to delete your custom definition:`,
+      defRemoved: (word) => `🗑️ Custom definition for "${word}" removed.`,
+      savedDefinition: "✅ Saved your definition for",
+     noWords: "No words to spin! Add some words first.",
+     allUsed: "All words used! Resetting for new round.",
+     appReset: "App reset to default settings!",
+     resetConfirm: "Reset all categories and words to default?",
+
+
+
+spinFirst: "Spin the wheel first!",
+loadingDef: "Loading definition...",
+definitionNotFound: "Definition not found.",
+offlineDef: "No definition available (offline).",
+maxCategories: "Maximum of {max} categories reached. Delete one before adding a new category.",
+emptyCategoryName: "Category name cannot be empty!",
+categoryExists: "Category \"{name}\" already exists!",
+categoryAdded: "✅ Category \"{name}\" added successfully!",
+categoryDeleted: "Category deleted successfully!",
+cannotDeleteLastCategory: "Cannot delete the last category!",
+wordEmpty: "Word cannot be empty!",
+maxWords: "Maximum of {max} words reached in this category. Delete some words before adding more.",
+addedWords: "✅ Added: {words}",
+skippedWords: "⚠️ Skipped (already exist): {words}",
+wordDeleted: "Word \"{word}\" deleted!",
+invalidTime: "Please enter a valid time.",
+
+deleteCategoryConfirm: "Delete category \"{category}\" and all its words?",
+noWordsInCategory: "No words in this category!",
+addWordsPrompt: "Add some words to get started.",
+definitionFetchError: "⚠️ Could not fetch definition (offline?).",
+
+    },
+
+    uk: {
+      spin: "🎯 КРУТИТИ!",
+      noRepeatOn: "Без повторів: УВІМК",
+      noRepeatOff: "Без повторів: ВИМК",
+      addCategory: "➕ Додати Категорію",
+      deleteCategory: "✖ Видалити Категорію",
+      speed: "⏩ Швидкість:",
+      reset: "🔄 Скинути",
+      showDefinition: "📖 Показати Визначення",
+      hideDefinition: "🙈 Приховати визначення",
+      addDefinition: "✍️ Додати визначення",
+      editDefinition: "✏️ Редагувати визначення",
+      category: "📂 Категорія",
+      manageWords: "📂 Керувати словами",
+      words: "Слова",
+      categories: "Категорії",
+      customDefPrompt: `Введіть власне визначення для "{word}" (💡 Порада: для кращих результатів перевірте Cambridge Dictionary). Залиште порожнім, щоб видалити власне визначення:`,
+      defRemoved: (word) => `🗑️ Власне визначення для "${word}" видалено.`,
+      savedDefinition: "✅ Збережено ваше визначення для",
+     noWords: "Немає слів для обертання! Спочатку додайте слова.",
+     allUsed: "Усі слова використано! Починаємо новий раунд.",
+     appReset: "Додаток скинуто до налаштувань за замовчуванням!",
+resetConfirm: "Скинути всі категорії та слова до стандартних?",
+
+
+
+spinFirst: "Спочатку обертайте колесо!",
+loadingDef: "Завантаження визначення...",
+definitionNotFound: "Визначення не знайдено.",
+offlineDef: "Немає визначення (офлайн).",
+maxCategories: "Досягнуто максимум {max} категорій. Видаліть одну, щоб додати нову.",
+emptyCategoryName: "Назва категорії не може бути порожньою!",
+categoryExists: "Категорія \"{name}\" вже існує!",
+categoryAdded: "✅ Категорію \"{name}\" успішно додано!",
+categoryDeleted: "Категорію успішно видалено!",
+cannotDeleteLastCategory: "Неможливо видалити останню категорію!",
+wordEmpty: "Слово не може бути порожнім!",
+maxWords: "Досягнуто максимум {max} слів у цій категорії. Видаліть деякі, щоб додати нові.",
+addedWords: "✅ Додано: {words}",
+skippedWords: "⚠️ Пропущено (вже існують): {words}",
+wordDeleted: "Слово \"{word}\" видалено!",
+invalidTime: "Будь ласка, введіть правильний час.",
+
+deleteCategoryConfirm: "Видалити категорію \"{category}\" та всі її слова?",
+noWordsInCategory: "У цій категорії немає слів!",
+addWordsPrompt: "Додайте кілька слів, щоб почати.",
+definitionFetchError: "⚠️ Не вдалося отримати визначення (офлайн?).",
+    },
+
+    hi: {
+      spin: "🎯 घुमाएँ!",
+      noRepeatOn: "दोहराव नहीं: चालू",
+    noRepeatOff: "दोहराव नहीं: बंद",
+      addCategory: "➕ श्रेणी जोड़ें",
+      deleteCategory: "✖ श्रेणी हटाएँ",
+      speed: "⏩ गति:",
+      reset: "🔄 रीसेट",
+      showDefinition: "📖 परिभाषा दिखाएँ",
+      hideDefinition: "🙈 परिभाषा छुपाएँ",
+      addDefinition: "✍️ परिभाषा जोड़ें",
+      editDefinition: "✏️ परिभाषा संपादित करें",
+      category: "📂 श्रेणी",
+      manageWords: "📂 शब्द प्रबंधन",
+      words: "शब्द",
+      categories: "श्रेणियाँ",
+      customDefPrompt: `"{word}" के लिए अपनी परिभाषा दर्ज करें (💡 सुझाव: बेहतर परिणामों के लिए Cambridge Dictionary देखें)। अपनी परिभाषा हटाने के लिए खाली छोड़ दें:`,
+      defRemoved: (word) => `🗑️ "${word}" की कस्टम परिभाषा हटा दी गई है।`,
+      savedDefinition: "✅ आपकी परिभाषा सहेजी गई है:",
+     noWords: "कोई शब्द नहीं हैं! पहले कुछ शब्द जोड़ें।",
+     allUsed: "सभी शब्दों का उपयोग हो गया! नया दौर शुरू हो रहा है।",
+     appReset: "ऐप को डिफ़ॉल्ट सेटिंग्स पर रीसेट कर दिया गया है!",
+resetConfirm: "सभी श्रेणियों और शब्दों को डिफ़ॉल्ट पर रीसेट करें?",
+
+
+
+spinFirst: "पहले पहिया घुमाएँ!",
+loadingDef: "परिभाषा लोड हो रही है...",
+definitionNotFound: "परिभाषा नहीं मिली।",
+offlineDef: "परिभाषा उपलब्ध नहीं है (ऑफ़लाइन)।",
+maxCategories: "अधिकतम {max} श्रेणियाँ पूरी हो गई हैं। नई जोड़ने से पहले एक हटाएँ।",
+emptyCategoryName: "श्रेणी का नाम खाली नहीं हो सकता!",
+categoryExists: "श्रेणी \"{name}\" पहले से मौजूद है!",
+categoryAdded: "✅ श्रेणी \"{name}\" सफलतापूर्वक जोड़ी गई!",
+categoryDeleted: "श्रेणी सफलतापूर्वक हटाई गई!",
+cannotDeleteLastCategory: "अंतिम श्रेणी को हटाया नहीं जा सकता!",
+wordEmpty: "शब्द खाली नहीं हो सकता!",
+maxWords: "इस श्रेणी में अधिकतम {max} शब्द पूरे हो गए हैं। नए जोड़ने से पहले कुछ हटाएँ।",
+addedWords: "✅ जोड़े गए: {words}",
+skippedWords: "⚠️ छोड़े गए (पहले से मौजूद): {words}",
+wordDeleted: "शब्द \"{word}\" हटाया गया!",
+invalidTime: "कृपया मान्य समय दर्ज करें।",
+
+deleteCategoryConfirm: "श्रेणी \"{category}\" और उसके सभी शब्द हटाएँ?",
+noWordsInCategory: "इस श्रेणी में कोई शब्द नहीं हैं!",
+addWordsPrompt: "शुरू करने के लिए कुछ शब्द जोड़ें।",
+definitionFetchError: "⚠️ परिभाषा प्राप्त नहीं हो सकी (ऑफ़लाइन?).",     
+    }
+  };
 
 function customPrompt(message, defaultValue = "") {
   return new Promise((resolve) => {
@@ -449,8 +601,8 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
         ctx.fillStyle = '#333';
         ctx.font = '20px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('No words in this category!', centerX, centerY);
-        ctx.fillText('Add some words to get started.', centerX, centerY + 30);
+        ctx.fillText(translations[currentLang].noWordsInCategory, centerX, centerY);
+        ctx.fillText(translations[currentLang].addWordsPrompt, centerX, centerY + 30);
         return;
       }
 
@@ -522,8 +674,16 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
     function spinArrow() {
       if (spinning) return;
       const words = categories[currentCategory];
-      if (!words || words.length === 0) { showMessage('No words to spin! Add some words first.', 'error'); return; }
-      if (nonRepeating && usedWords.length === words.length) { usedWords = []; showMessage('All words used! Resetting for new round.', 'success'); }
+      if (!words || words.length === 0) { 
+  const currentLang = document.getElementById("languageSwitcher").value;
+  showMessage(translations[currentLang].noWords, 'error'); 
+  return; 
+}
+      if (nonRepeating && usedWords.length === words.length) { 
+  usedWords = []; 
+  const currentLang = document.getElementById("languageSwitcher").value;
+  showMessage(translations[currentLang].allUsed, 'success'); 
+}
       spinning = true;
       const sliceAngle = (2 * Math.PI) / words.length;
       let targetIndex;
@@ -554,10 +714,7 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
           const display = document.getElementById('answerDisplay');
           const hyph = hyphenateLetters(selectedWord);
 
-          // Clear old definition after spin
-          document.getElementById("definitionBox").innerText = "";
-          document.getElementById("cambridgeLink").style.display = "none";
-
+          resetDefinitionUI();
 
 
           if (currentCategory === 'Colors') {
@@ -565,11 +722,36 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
               <span class="letters" aria-label="${selectedWord}">${hyph}</span>
               <div style="margin-top:10px;width:60px;height:30px;border-radius:5px; background-color:${colorMap[selectedWord] || '#FFFFFF'}; border:1px solid #333; display:inline-block;"></div>
             `;
-          } else {
+
+// ✅ Update Add/Edit Definition button
+  const addBtn = document.getElementById("addDefBtn");
+  if (addBtn) {
+    const customDef = localStorage.getItem(
+      "customDef_" + (selectedWord || "").toLowerCase()
+    );
+    const currentLang = document.getElementById("languageSwitcher").value;
+    addBtn.textContent = customDef
+      ? translations[currentLang].editDefinition
+      : translations[currentLang].addDefinition;
+  }
+
+     } else {
             display.innerHTML = `<span class="letters" aria-label="${selectedWord}">${hyph}</span>`;
+
+// ✅ Update Add/Edit Definition button
+  const addBtn = document.getElementById("addDefBtn");
+  if (addBtn) {
+    const customDef = localStorage.getItem(
+      "customDef_" + (selectedWord || "").toLowerCase()
+    );
+    const currentLang = document.getElementById("languageSwitcher").value;
+    addBtn.textContent = customDef
+      ? translations[currentLang].editDefinition
+      : translations[currentLang].addDefinition;
           }
-        }
       }
+    }
+  }
       requestAnimationFrame(animate);
     }
 
@@ -594,9 +776,10 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
 
     function toggleNonRepeating() {
       nonRepeating = !nonRepeating;
-      document.getElementById('nonRepeatStatus').innerText = nonRepeating ? 'ON' : 'OFF';
-      drawWheel();
-    }
+      document.getElementById('nonRepeatStatus').innerText = nonRepeating ? translations[currentLang].noRepeatOn 
+      : translations[currentLang].noRepeatOff;
+  drawWheel();
+}
 
     function showAddCategoryForm() {
       const form = document.getElementById('addCategoryForm');
@@ -616,12 +799,18 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
 
     function confirmAddCategory() {
       const currentCategoryCount = Object.keys(categories).length;
-      if (currentCategoryCount >= MAX_CATEGORIES) { showMessage(`Maximum of ${MAX_CATEGORIES} categories reached. Delete one before adding a new category.`, 'error'); return; }
+      if (currentCategoryCount >= MAX_CATEGORIES) { const currentLang = document.getElementById("languageSwitcher").value;
+        showMessage(translations[currentLang].maxCategories.replace("{max}", MAX_CATEGORIES), 'error');
+        return; }
       const name = document.getElementById('newCategoryInput').value;
-      if (!name || !name.trim()) { showMessage('Category name cannot be empty!', 'error'); return; }
+      if (!name || !name.trim()) { const currentLang = document.getElementById("languageSwitcher").value;
+        showMessage(translations[currentLang].emptyCategoryName, 'error');
+        return; }
       const trimmedName = name.trim();
       const existing = Object.keys(categories).map(c => c.toLowerCase());
-      if (existing.includes(trimmedName.toLowerCase())) { showMessage(`Category "${trimmedName}" already exists!`, 'error'); return; }
+      if (existing.includes(trimmedName.toLowerCase())) { const currentLang = document.getElementById("languageSwitcher").value;
+        showMessage(translations[currentLang].categoryExists.replace("{name}", trimmedName), 'error');
+        return; }
       categories[trimmedName] = [];
       currentCategory = trimmedName;
       saveCategories();
@@ -629,14 +818,20 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
       drawWheel();
       updateWordList();
       cancelAddCategory();
-      showMessage(`✅ Category "${trimmedName}" added successfully!`, 'success');
+      const currentLang = document.getElementById("languageSwitcher").value;
+      showMessage(translations[currentLang].categoryAdded.replace("{name}", trimmedName), 'success');
     }
 
     function createCategory() { showAddCategoryForm(); }
 
     function deleteCategory() {
-      if (Object.keys(categories).length <= 1) { showMessage('Cannot delete the last category!', 'error'); return; }
-      if (confirm(`Delete category "${currentCategory}" and all its words?`)) {
+      if (Object.keys(categories).length <= 1) { const currentLang = document.getElementById("languageSwitcher").value;
+        showMessage(translations[currentLang].cannotDeleteLastCategory, 'error');
+        return; 
+      }
+      const currentLang = document.getElementById("languageSwitcher").value;
+      if (confirm(translations[currentLang].deleteCategoryConfirm.replace("{category}", currentCategory))) {
+
         delete categories[currentCategory];
         const keys = Object.keys(categories);
         currentCategory = keys.length ? keys[0] : '';
@@ -650,40 +845,60 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
 
     
     function addWord() {
-      let input = document.getElementById('newWordInput').value.trim();
-      if (!input) { showMessage('Word cannot be empty!', 'error'); return; }
+  // ✅ Add once per function
+  const currentLang = document.getElementById("languageSwitcher").value;
 
-      // Allow multiple words separated by commas
-      let words = input.split(',').map(w => w.trim()).filter(Boolean);
+  let input = document.getElementById('newWordInput').value.trim();
+  if (!input) {
+    showMessage(translations[currentLang].wordEmpty, 'error');
+    return;
+  }
 
-      let added = [];
-      let skipped = [];
+  // Allow multiple words separated by commas
+  let words = input.split(',').map(w => w.trim()).filter(Boolean);
 
-      words.forEach(word => {
-        if (categories[currentCategory].length >= MAX_WORDS_PER_CATEGORY) {
-          showMessage(`Maximum of ${MAX_WORDS_PER_CATEGORY} words reached in this category. Delete some words before adding more.`, 'error');
-          return;
-        }
-        // Normalize casing
-        word = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  let added = [];
+  let skipped = [];
 
-        if (!categories[currentCategory].includes(word)) {
-          categories[currentCategory].push(word);
-          added.push(word);
-        } else {
-          skipped.push(word);
-        }
-      });
-
-      saveCategories();
-      document.getElementById('newWordInput').value = '';
-      drawWheel();
-      updateWordList();
-
-      if (added.length > 0) showMessage(`✅ Added: ${added.join(', ')}`, 'success');
-      if (skipped.length > 0) showMessage(`⚠️ Skipped (already exist): ${skipped.join(', ')}`, 'warning');
+  words.forEach(word => {
+    if (categories[currentCategory].length >= MAX_WORDS_PER_CATEGORY) {
+      showMessage(
+        translations[currentLang].maxWords.replace("{max}", MAX_WORDS_PER_CATEGORY),
+        'error'
+      );
+      return;
     }
 
+    // Normalize casing
+    word = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+
+    if (!categories[currentCategory].includes(word)) {
+      categories[currentCategory].push(word);
+      added.push(word);
+    } else {
+      skipped.push(word);
+    }
+  });
+
+  saveCategories();
+  document.getElementById('newWordInput').value = '';
+  drawWheel();
+  updateWordList();
+
+  if (added.length > 0) {
+    showMessage(
+      translations[currentLang].addedWords.replace("{words}", added.join(", ")),
+      "success"
+    );
+  }
+
+  if (skipped.length > 0) {
+    showMessage(
+      translations[currentLang].skippedWords.replace("{words}", skipped.join(", ")),
+      "warning"
+    );
+  }
+}
 
     function deleteWord(word) {
       categories[currentCategory] = categories[currentCategory].filter(w => w !== word);
@@ -702,7 +917,8 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
         updateCategoryDropdown();
         drawWheel();
         updateWordList();
-        showMessage('App reset to default settings!', 'success');
+const currentLang = document.getElementById("languageSwitcher").value;
+showMessage(translations[currentLang].appReset, 'success');
       }
     }
 
@@ -816,11 +1032,7 @@ setTimeout(loadVoices, 200);
       }, 100);
     });
 
-    // Initialize the app
-    updateCategoryDropdown();
-    drawWheel();
-    updateWordList();
-    document.getElementById('nonRepeatStatus').innerText = 'ON';
+    
 
     // Modal functionality for About section
     document.addEventListener('DOMContentLoaded', function () {
@@ -865,13 +1077,34 @@ async function getDefinition(word) {
 // Reset definition UI after each spin
 function resetDefinitionUI() {
   document.getElementById("definitionBox").innerText = "";
-  document.getElementById("cambridgeLink").style.display = "none";
-  const defBtn = document.getElementById("showDefBtn");
-  if (defBtn) defBtn.textContent = "📖 Show Definition";
+  const linkBox = document.getElementById("cambridgeLink");
+if (linkBox) {
+  linkBox.style.display = "none";
 }
-
+  const defBtn = document.getElementById("showDefBtn");
+  if (defBtn) {
+    const currentLang = document.getElementById("languageSwitcher").value;
+    defBtn.textContent = translations[currentLang].showDefinition;
+  }
+}
 // Attach button events
 document.addEventListener("DOMContentLoaded", () => {
+
+ // Initialize language when DOM is ready
+  const langSwitcher = document.getElementById("languageSwitcher");
+  currentLang = langSwitcher ? langSwitcher.value : "en";
+
+// Initialize the app
+    updateCategoryDropdown();
+    drawWheel();
+    updateWordList();
+    document.getElementById("nonRepeatStatus").innerText =
+  nonRepeating ? translations[currentLang].noRepeatOn : translations[currentLang].noRepeatOff;
+    
+
+  // Draw the wheel with the correct language right away
+  drawWheel();
+
   const defBtn = document.getElementById("showDefBtn");
   const addBtn = document.getElementById("addDefBtn");
   const box = document.getElementById("definitionBox");
@@ -892,16 +1125,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const def = await getDefinition(selectedWord);
         box.innerText = def;
 
-        const link = linkBox.querySelector("a");
-        link.href = `https://dictionary.cambridge.org/dictionary/english/${selectedWord}`;
-        linkBox.style.display = "block";
+        if (linkBox) {
+          const link = linkBox.querySelector("a");
+          link.href = `https://dictionary.cambridge.org/dictionary/english/${selectedWord}`;
+          linkBox.style.display = "block";
+        }
 
-        defBtn.textContent = "🙈 Hide Definition";
+        const currentLang = document.getElementById("languageSwitcher").value;
+        defBtn.textContent = translations[currentLang].hideDefinition;
         definitionVisible = true;
       } else {
         box.innerText = "";
-        linkBox.style.display = "none";
-        defBtn.textContent = "📖 Show Definition";
+
+        if (linkBox) {
+          linkBox.style.display = "none";
+        }
+        const currentLang = document.getElementById("languageSwitcher").value;
+        defBtn.textContent = translations[currentLang].showDefinition;
         definitionVisible = false;
       }
     });
@@ -915,38 +1155,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       let existing = localStorage.getItem("customDef_" + selectedWord.toLowerCase()) || "";
-      const newDef = await customPrompt(
-        `Enter your own definition for "${selectedWord}" (💡 Tip: For better results, check Cambridge Dictionary). Leave empty to delete your custom definition:`,
-        existing
-      );
+      const currentLang = document.getElementById("languageSwitcher").value;
+
+      // get translated string and replace {word} with actual selectedWord
+      const promptText = translations[currentLang].customDefPrompt.replace("{word}", selectedWord);
+
+      const newDef = await customPrompt(promptText, existing);
 
       if (newDef && newDef.trim() !== "") {
         localStorage.setItem("customDef_" + selectedWord.toLowerCase(), newDef.trim());
         box.innerText = newDef.trim();
-        showMessage(`✅ Saved your definition for "${selectedWord}"`, "success");
-        addBtn.textContent = "✏️ Edit Definition";
+        showMessage(`${translations[currentLang].savedDefinition} "${selectedWord}"`, "success");
+        addBtn.textContent = translations[currentLang].editDefinition;
       } else {
         localStorage.removeItem("customDef_" + selectedWord.toLowerCase());
         box.innerText = "";
-        showMessage(`🗑️ Custom definition for "${selectedWord}" removed.`, "warning");
-        addBtn.textContent = "✍️ Add Definition";
+        showMessage(translations[currentLang].defRemoved(selectedWord), "warning");
       }
     });
   }
-
-  // Update add/edit button when word changes
-  const originalSpinArrow = spinArrow;
-  spinArrow = function() {
-    originalSpinArrow();
-    resetDefinitionUI();
-
-    if (addBtn) {
-      const customDef = localStorage.getItem("customDef_" + (selectedWord || "").toLowerCase());
-      addBtn.textContent = customDef ? "✏️ Edit Definition" : "✍️ Add Definition";
-    }
-  };
 });
-
 
 
     // Study timer
@@ -956,7 +1184,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
       const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
       
-      if (minutes <= 0 && seconds <= 0) { showMessage('Please enter a valid time.', 'error'); return; }
+      if (minutes <= 0 && seconds <= 0) { const currentLang = document.getElementById("languageSwitcher").value;
+        showMessage(translations[currentLang].invalidTime, 'error'); 
+        return;
+      }
       remainingSeconds = (minutes * 60) + seconds;
       updateTimerDisplay();
       if (timerInterval) clearInterval(timerInterval);
@@ -1005,6 +1236,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
+
+  function setLanguage(lang) {
+  currentLang = lang;
+  document.getElementById("speedLabel").textContent = translations[lang].speed;
+  document.getElementById("spinButton").textContent = translations[lang].spin;
+  document.getElementById('nonRepeatStatus').innerText = nonRepeating ? translations[lang].noRepeatOn: translations[lang].noRepeatOff;
+  
+  document.getElementById("addCategoryBtn").textContent = translations[lang].addCategory;
+  document.getElementById("deleteCategoryBtn").textContent = translations[lang].deleteCategory;
+  document.getElementById("resetButton").textContent = translations[lang].reset;
+  document.getElementById("showDefBtn").textContent = translations[lang].showDefinition;
+  document.getElementById("addDefBtn").textContent = translations[lang].addDefinition;
+  document.querySelector("label[for='categorySelect']").textContent = translations[lang].category;
+  document.getElementById("wordCountLabel").textContent = translations[lang].words;
+  document.getElementById("categoryCountLabel").textContent = translations[lang].categories;
+  document.getElementById("categoryLabel").textContent = translations[lang].category + ":";
+  document.getElementById("manageWordsLabel").textContent = translations[lang].manageWords;
+  document.getElementById("wordCountLabel").textContent = translations[lang].words + ": " + categories[currentCategory].length + "/50";
+  document.getElementById("categoryCountLabel").textContent = translations[lang].categories + ": " + Object.keys(categories).length + "/50";
+  drawWheel();
+}
 
 </script>
 
