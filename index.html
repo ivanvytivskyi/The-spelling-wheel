@@ -312,8 +312,8 @@ select {
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-box">
       <span class="close-btn" id="closeModal">&times;</span><br>
-      <h2>✨ About Ivan Vytivskyi</h2>
-        <div style="display: flex; flex-direction: column; align-items: center; text-align: justify;">
+      <h2 id="aboutTitle">✨ About Ivan Vytivskyi</h2>
+        <div id="aboutText" style="display: flex; flex-direction: column; align-items: center; text-align: justify;">
   <img src="ivan.jpg" alt="Ivan" style="max-width: 250px; border-radius: 12px; margin-bottom: 15px;" />
   <div>
     <p > 
@@ -351,6 +351,7 @@ let currentLang = "en";
  const translations = {
     en: {
       spin: "🎯 SPIN!",
+      languageLabel: "🌍 Language:",
       noRepeatOn: "No Repeat: ON",
       noRepeatOff: "No Repeat: OFF",
       addCategory: "➕ Add Category",
@@ -372,9 +373,7 @@ let currentLang = "en";
      allUsed: "All words used! Resetting for new round.",
      appReset: "App reset to default settings!",
      resetConfirm: "Reset all categories and words to default?",
-
-
-
+     
 spinFirst: "Spin the wheel first!",
 loadingDef: "Loading definition...",
 definitionNotFound: "Definition not found.",
@@ -396,11 +395,16 @@ deleteCategoryConfirm: "Delete category \"{category}\" and all its words?",
 noWordsInCategory: "No words in this category!",
 addWordsPrompt: "Add some words to get started.",
 definitionFetchError: "⚠️ Could not fetch definition (offline?).",
-
+placeholder: "Spin the wheel to see the word here!",
+    add: "✅ Add",
+    cancel: "❌ Cancel",
+    title: "🎯The Spelling Wheel✨",
+aboutTitle: "✨ About Ivan Vytivskyi",
     },
 
     uk: {
       spin: "🎯 КРУТИТИ!",
+      languageLabel: "🌍 Lang/Мова:",
       noRepeatOn: "Без повторів: УВІМК",
       noRepeatOff: "Без повторів: ВИМК",
       addCategory: "➕ Додати Категорію",
@@ -446,9 +450,32 @@ deleteCategoryConfirm: "Видалити категорію \"{category}\" та 
 noWordsInCategory: "У цій категорії немає слів!",
 addWordsPrompt: "Додайте кілька слів, щоб почати.",
 definitionFetchError: "⚠️ Не вдалося отримати визначення (офлайн?).",
+placeholder: "Крутіть колесо, щоб побачити слово тут!",
+add: "✅ Додати",
+    cancel: "❌ Скасувати",
+title: "🎯Колесо для правопису✨",
+     aboutTitle: "✨ Про Івана Витівського",
+aboutText: `
+      Мене звати Іван Витівський, я з маленького села Гаївщина в Україні.
+      Я створив цей застосунок «Колесо для правопису Івана», коли почав вивчати англійську з нуля.<br><br>
+
+      Правопис завжди був для мене найважчою частиною у вивченні англійської.
+      Я пробував багато методів: переписував ті самі слова у зошиті знову і знову,
+      наймав учителів (але заняття були занадто дорогими), навіть зробив коробку карток — з помилковим словом на одному боці та правильним на іншому.
+      Але я помітив велику проблему — спершу я запам’ятовував неправильний варіант, бо бачив його раніше за правильний.<br><br>
+
+      Мені потрібне було краще рішення: таке, щоб слово можна було почути вголос, записати його, а потім перевірити правильний правопис.<br><br>
+
+      Саме тому я створив цей застосунок — «Колесо для правопису Івана».
+      Він простий і легкий у використанні: ви обертаєте колесо, слухаєте слово, записуєте його і перевіряєте правильність написання.<br><br>
+
+      Сподіваюся, цей інструмент допоможе й іншим учням англійської, так само як і мені.
+    `
     },
 
     hi: {
+      title: "🎯स्पेलिंग व्हील✨",
+      languageLabel: "🌍 Lang/भाषा:",
       spin: "🎯 घुमाएँ!",
       noRepeatOn: "दोहराव नहीं: चालू",
     noRepeatOff: "दोहराव नहीं: बंद",
@@ -494,8 +521,28 @@ invalidTime: "कृपया मान्य समय दर्ज करे�
 deleteCategoryConfirm: "श्रेणी \"{category}\" और उसके सभी शब्द हटाएँ?",
 noWordsInCategory: "इस श्रेणी में कोई शब्द नहीं हैं!",
 addWordsPrompt: "शुरू करने के लिए कुछ शब्द जोड़ें।",
-definitionFetchError: "⚠️ परिभाषा प्राप्त नहीं हो सकी (ऑफ़लाइन?).",     
-    }
+definitionFetchError: "⚠️ परिभाषा प्राप्त नहीं हो सकी (ऑफ़लाइन?).",
+placeholder: "शब्द देखने के लिए पहिया घुमाएँ!",
+add: "✅ जोड़ें",
+    cancel: "❌ रद्द करें",
+ aboutTitle: "✨ इवान वितिव्स्की के बारे में",     
+aboutText: `
+      मेरा नाम इवान वितिव्स्की है, मैं यूक्रेन के एक छोटे से गाँव हाइवश्चिना से हूँ।
+      मैंने यह ऐप, "इवान का स्पेलिंग व्हील", तब बनाया जब मैं शून्य से अंग्रेज़ी सीख रहा था।<br><br>
+
+      मेरे लिए अंग्रेज़ी सीखने का सबसे कठिन हिस्सा हमेशा वर्तनी रहा है।
+      मैंने कई तरीकों को आज़माया: बार-बार वही शब्द कॉपी करना,
+      शिक्षकों को रखना (लेकिन कक्षाएँ बहुत महंगी थीं), यहाँ तक कि मैंने फ्लैशकार्ड का एक डिब्बा भी बनाया — जिसमें गलत वर्तनी एक तरफ और सही दूसरी तरफ थी।
+      लेकिन मैंने एक बड़ी समस्या देखी — मैं पहले गलत वर्तनी याद कर रहा था, क्योंकि मैंने उसे सही वाले से पहले देखा।<br><br>
+
+      मुझे एक बेहतर समाधान चाहिए था: ऐसा जिसमें शब्द ज़ोर से बोला जाए, मैं उसे लिख सकूँ, और फिर सही वर्तनी देख सकूँ।<br><br>
+
+      यही कारण है कि मैंने यह ऐप बनाया — "इवान का स्पेलिंग व्हील"।
+      यह सरल और उपयोग में आसान है: आप पहिया घुमाते हैं, आवाज़ सुनते हैं, शब्द लिखते हैं और फिर जाँचते हैं कि आपने सही लिखा या नहीं।<br><br>
+
+      मुझे उम्मीद है कि यह साधन अन्य अंग्रेज़ी सीखने वालों की भी मदद करेगा, जैसे यह मेरी कर रहा है।
+    `
+  }
   };
 
 function customPrompt(message, defaultValue = "") {
@@ -936,18 +983,25 @@ showMessage(translations[currentLang].appReset, 'success');
     }
 
     function updateWordCountLabel() {
-      const countLabel = document.getElementById('wordCountLabel');
-      if (currentCategory && categories[currentCategory]) {
-        countLabel.textContent = 'Words: ' + categories[currentCategory].length + '/' + MAX_WORDS_PER_CATEGORY;
-      } else {
-        countLabel.textContent = 'Words: 0/' + MAX_WORDS_PER_CATEGORY;
-      }
-    }
+  const countLabel = document.getElementById('wordCountLabel');
+  const currentLang = document.getElementById("languageSwitcher").value;
+  if (currentCategory && categories[currentCategory]) {
+    countLabel.textContent =
+      translations[currentLang].words + ": " +
+      categories[currentCategory].length + "/" + MAX_WORDS_PER_CATEGORY;
+  } else {
+    countLabel.textContent =
+      translations[currentLang].words + ": 0/" + MAX_WORDS_PER_CATEGORY;
+  }
+}
 
     function updateCategoryCountLabel() {
-      const countLabel = document.getElementById('categoryCountLabel');
-      countLabel.textContent = 'Categories: ' + Object.keys(categories).length + '/' + MAX_CATEGORIES;
-    }
+  const countLabel = document.getElementById('categoryCountLabel');
+  const currentLang = document.getElementById("languageSwitcher").value;
+  countLabel.textContent =
+    translations[currentLang].categories + ": " +
+    Object.keys(categories).length + "/" + MAX_CATEGORIES;
+}
 
     function updateWordList() {
       const ul = document.getElementById('wordList');
@@ -1250,13 +1304,21 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("showDefBtn").textContent = translations[lang].showDefinition;
   document.getElementById("addDefBtn").textContent = translations[lang].addDefinition;
   document.querySelector("label[for='categorySelect']").textContent = translations[lang].category;
-  document.getElementById("wordCountLabel").textContent = translations[lang].words;
   document.getElementById("categoryCountLabel").textContent = translations[lang].categories;
   document.getElementById("categoryLabel").textContent = translations[lang].category + ":";
   document.getElementById("manageWordsLabel").textContent = translations[lang].manageWords;
-  document.getElementById("wordCountLabel").textContent = translations[lang].words + ": " + categories[currentCategory].length + "/50";
+  document.getElementById("wordCountLabel").textContent =
+  translations[lang].words + ": " + categories[currentCategory].length + "/" + MAX_WORDS_PER_CATEGORY;
   document.getElementById("categoryCountLabel").textContent = translations[lang].categories + ": " + Object.keys(categories).length + "/50";
   drawWheel();
+  document.getElementById("answerDisplay").textContent = translations[lang].placeholder;
+  document.getElementById("confirmAddCategoryBtn").textContent = translations[lang].add;
+  document.getElementById("cancelAddCategoryBtn").textContent = translations[lang].cancel;
+  document.querySelector("h1").textContent = translations[lang].title;
+  document.querySelector("label[for='languageSwitcher']").textContent =  translations[lang].languageLabel;
+  document.getElementById("aboutTitle").textContent = translations[lang].aboutTitle;
+  document.querySelector(".modal-box div div").innerHTML = translations[lang].aboutText;
+  
 }
 
 </script>
