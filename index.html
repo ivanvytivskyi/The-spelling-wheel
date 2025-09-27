@@ -107,6 +107,12 @@ button {
   text-align: center;
 }
 
+#spinButton{
+min-width: 160px;
+min-height: 60px;
+
+}  
+
 select {
   padding: 6px 10px;
   font-size: 15px;
@@ -120,7 +126,7 @@ select {
   display: flex;
   justify-content: center;
   gap: 10px;
-  flex-wrap: nowrap;         /* don't wrap to a new line */
+  flex-wrap: nowrap;
 }
 
 /* Style only those two buttons inside .definition-buttons */
@@ -628,6 +634,7 @@ function customPrompt(message, defaultValue = "") {
     let usedWords = [];
     let nonRepeating = true;
     let selectedWord = '';
+    let definitionVisible = false;
 
     let allVoices = [];
 let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
@@ -762,6 +769,7 @@ let voiceMap = { ukFemale: null, ukMale: null, usFemale: null, usMale: null };
           const hyph = hyphenateLetters(selectedWord);
 
           resetDefinitionUI();
+          definitionVisible = false;
 
 
           if (currentCategory === 'Colors') {
@@ -1164,7 +1172,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const box = document.getElementById("definitionBox");
   const linkBox = document.getElementById("cambridgeLink");
 
-  let definitionVisible = false;
+
 
   if (defBtn) {
     defBtn.addEventListener("click", async () => {
