@@ -231,7 +231,50 @@ select {
   border: 2px solid #007bff;
   border-radius: 8px;
 }
+/* Custom Popup Styles */
+.popup-overlay {
+  display: none; /* hidden by default */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
 
+.popup-box {
+  background: #fff;
+  padding: 20px 25px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.popup-box h2 {
+  margin-bottom: 15px;
+  color: #e63946;
+  font-size: 20px;
+}
+
+.popup-box button {
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.popup-box button:hover {
+  background: #0056b3;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
 </style>
 </head>
 <body>
@@ -278,10 +321,10 @@ select {
   <div style="display: flex; align-items: center; gap: 5px;">
     <label for="voiceSelect">🎙</label>
    <select id="voiceSelect">
-  <option value="ukFemale">🇬🇧 UK F</option>
-  <option value="ukMale">🇬🇧 UK M</option>
-  <option value="usFemale">🇺🇸 US F</option>
-  <option value="usMale">🇺🇸 US M</option>
+  <option value="ukFemale">🇬🇧 UK Female</option>
+  <option value="ukMale">🇬🇧 UK Male</option>
+  <option value="usFemale">🇺🇸 US Female</option>
+  <option value="usMale">🇺🇸 US Male</option>
 </select>
   </div>
 
@@ -406,6 +449,7 @@ placeholder: "Spin the wheel to see the word here!",
     cancel: "❌ Cancel",
     title: "🎯The Spelling Wheel✨",
 aboutTitle: "✨ About Ivan Vytivskyi",
+timeUp: "⏰ Time is up!",
     },
 
     uk: {
@@ -451,6 +495,7 @@ addedWords: "✅ Додано: {words}",
 skippedWords: "⚠️ Пропущено (вже існують): {words}",
 wordDeleted: "Слово \"{word}\" видалено!",
 invalidTime: "Будь ласка, введіть правильний час.",
+timeUp: "⏰ Час вийшов!",
 
 deleteCategoryConfirm: "Видалити категорію \"{category}\" та всі її слова?",
 noWordsInCategory: "У цій категорії немає слів!",
@@ -523,6 +568,7 @@ addedWords: "✅ जोड़े गए: {words}",
 skippedWords: "⚠️ छोड़े गए (पहले से मौजूद): {words}",
 wordDeleted: "शब्द \"{word}\" हटाया गया!",
 invalidTime: "कृपया मान्य समय दर्ज करें।",
+timeUp: "⏰ समय समाप्त!",
 
 deleteCategoryConfirm: "श्रेणी \"{category}\" और उसके सभी शब्द हटाएँ?",
 noWordsInCategory: "इस श्रेणी में कोई शब्द नहीं हैं!",
@@ -1238,44 +1284,90 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// --- Popup helpers (global) ---
+function showTimeUpPopup() {
+  const popup = document.getElementById("timeUpPopup");
+  const currentLang = document.getElementById("languageSwitcher").value;
+  document.getElementById("timeUpMessage").innerText =
+    translations[currentLang].timeUp || "⏰ Time is up!";
+  popup.style.display = "flex";
+}
 
-    // Study timer
-    let timerInterval;
-    let remainingSeconds = 0;
-    function startTimer() {
-      const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
-      const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
-      
-      if (minutes <= 0 && seconds <= 0) { const currentLang = document.getElementById("languageSwitcher").value;
-        showMessage(translations[currentLang].invalidTime, 'error'); 
-        return;
-      }
-      remainingSeconds = (minutes * 60) + seconds;
-      updateTimerDisplay();
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        if (remainingSeconds === 4) { document.getElementById('timerSound').play(); }
-        remainingSeconds--;
-        if (remainingSeconds < 0) { clearInterval(timerInterval); remainingSeconds = 0; }
-        updateTimerDisplay();
-      }, 1000);
-    }
-    function stopTimer() { clearInterval(timerInterval); remainingSeconds = 0; updateTimerDisplay(); }
-   function updateTimerDisplay() {
+function closeTimeUpPopup() {
+  const popup = document.getElementById("timeUpPopup");
+  popup.style.display = "none";
+}
+
+  // Study timer
+let timerInterval;
+let endTime = null;
+let timerSoundPlayed = false;
+
+function startTimer() {
+  const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+  const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+
+  if (minutes <= 0 && seconds <= 0) {
+    const currentLang = document.getElementById("languageSwitcher").value;
+    showMessage(translations[currentLang].invalidTime, 'error');
+    return;
+  }
+
+  // Pre-play muted sound once to "unlock" audio (required by browsers)
+  const sound = document.getElementById('timerSound');
+  sound.play().then(() => sound.pause()); // just to unlock
+
+  // Set end time
+endTime = Date.now() + (minutes * 60 + seconds) * 1000;
+timerSoundPlayed = false;
+
+if (timerInterval) clearInterval(timerInterval);
+updateTimerDisplay();
+
+timerInterval = setInterval(() => {
+  updateTimerDisplay();
+}, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  endTime = null;
+  timerSoundPlayed = false;
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  let remainingSeconds = 0;
+
+  if (endTime) {
+    remainingSeconds = Math.round((endTime - Date.now()) / 1000);
+    if (remainingSeconds <= 0) {
+      clearInterval(timerInterval);
+      endTime = null;
+      remainingSeconds = 0;
+
+      // 🔔 Play sound at the end (if allowed)
+      const sound = document.getElementById('timerSound');
+      sound.currentTime = 0;
+      sound.play().catch(() => {
+        console.log("Browser blocked the sound, showing popup only.");
+      });
+    // 🟢 Show popup
+  showTimeUpPopup();
+}
+  }
+
   const minutes = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
   const seconds = (remainingSeconds % 60).toString().padStart(2, '0');
 
   const minutesInput = document.getElementById('minutesInput');
   const secondsInput = document.getElementById('secondsInput');
 
-  if (remainingSeconds > 0) {
-    minutesInput.value = minutes;
-    secondsInput.value = seconds;
-  } else {
-    minutesInput.value = "0";
-    secondsInput.value = "0";
-  }
+  minutesInput.value = minutes;
+  secondsInput.value = seconds;
 }
+
+
     
 // (Old dictionary removed here)
     
@@ -1367,5 +1459,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 </script>
+<!-- Custom Popup for Timer -->
+<div id="timeUpPopup" class="popup-overlay">
+  <div class="popup-box">
+    <h2 id="timeUpMessage">⏰ Time is up!</h2>
+    <button onclick="closeTimeUpPopup()">OK</button>
+  </div>
+</div>
 </body>
 </html>
