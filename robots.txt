@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://the-spelling-wheel.netlify.app/sitemap.xml
