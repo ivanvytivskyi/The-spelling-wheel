@@ -1080,3 +1080,56 @@ document.getElementById("introText").textContent = translations[currentLang].int
       event_label: 'Spin button pressed'
     });
   }
+
+(function () {
+  const likeBtn = document.getElementById("likeBtn");
+  const dislikeBtn = document.getElementById("dislikeBtn");
+  const likeCountEl = document.getElementById("likeCount");
+  const dislikeCountEl = document.getElementById("dislikeCount");
+  if (!likeBtn || !dislikeBtn) return;
+
+  let userChoice = null;
+
+  function setDisabled() {
+    likeBtn.disabled = userChoice === "like";
+    dislikeBtn.disabled = userChoice === "dislike";
+  }
+
+  function renderCounts({ likes, dislikes, userChoice: choice }) {
+    likeCountEl.textContent = likes;
+    dislikeCountEl.textContent = dislikes;
+    userChoice = choice;
+    setDisabled();
+  }
+
+  // 1) Load current totals + user's existing choice
+  fetch("/.netlify/functions/vote", {
+    method: "GET",
+    credentials: "include", // ensure cookie is sent
+  })
+    .then((r) => r.json())
+    .then(renderCounts)
+    .catch(() => { /* ignore */ });
+
+  // 2) Send a vote
+  async function sendVote(choice) {
+    const res = await fetch("/.netlify/functions/vote", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ choice }),
+    });
+    const data = await res.json();
+    renderCounts(data);
+  }
+
+  likeBtn.addEventListener("click", () => {
+    if (userChoice === "like") return;
+    sendVote("like");
+  });
+
+  dislikeBtn.addEventListener("click", () => {
+    if (userChoice === "dislike") return;
+    sendVote("dislike");
+  });
+})();
