@@ -34,7 +34,7 @@
 <!-- 👇 Add these two lines here -->
 <link rel="manifest" href="manifest.json" />
 <link rel="stylesheet" href="styles.css">
-<meta name="google-site-verification" content="saPDk9tn6eG833Ns0U11kVX1MPqLI_nP7wEm-G8_hYg" />
+
 </head>
 <body>
   <!-- 🌍 Language switcher -->
@@ -271,8 +271,10 @@ I hope this tool helps other English learners just like it’s helping me.
   <button class="red-btn" onclick="stopTimer()">⏹ Stop</button>
 </div>
    </div>
-
-<div class="developer-info">
+<div class="feedback" style="display:flex;gap:12px;justify-content:center;align-items:center;margin:16px 0;">
+  <button id="likeBtn">👍 Like <span id="likeCount">0</span></button>
+  <button id="dislikeBtn">👎 Dislike <span id="dislikeCount">0</span></button>
+</div><div class="developer-info">
     ℹ️ About| Developed by<a id="aboutLink"> Ivan Vytivskyi </a>
   </div>
 
