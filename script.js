@@ -1091,8 +1091,15 @@ document.getElementById("introText").textContent = translations[currentLang].int
   let userChoice = null;
 
   function setDisabled() {
-    likeBtn.disabled = userChoice === "like";
-    dislikeBtn.disabled = userChoice === "dislike";
+    likeBtn.classList.remove("like-selected");
+    dislikeBtn.classList.remove("dislike-selected");
+
+    if (userChoice === "like") {
+      likeBtn.classList.add("like-selected");
+    }
+    if (userChoice === "dislike") {
+      dislikeBtn.classList.add("dislike-selected");
+    }
   }
 
   function renderCounts({ likes, dislikes, userChoice: choice }) {
