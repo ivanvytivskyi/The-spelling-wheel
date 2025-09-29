@@ -784,6 +784,26 @@ setTimeout(loadVoices, 200);
     spinArrow();
   }
 });
+ 
+document.addEventListener("DOMContentLoaded", () => {
+  const spinBtn = document.getElementById("spinButton");
+  const wheelCanvas = document.getElementById("wheelCanvas"); // change ID if needed
+
+  if (spinBtn) {
+    spinBtn.addEventListener("click", () => {
+      spinArrow();
+      trackSpinClick?.();
+    });
+  }
+
+  if (wheelCanvas) {
+    wheelCanvas.addEventListener("click", () => {
+      spinArrow();
+      trackSpinClick?.();
+    });
+  }
+});
+
 
     document.getElementById('newWordInput').addEventListener('keypress', (event) => {
       if (event.key === 'Enter') { event.preventDefault(); addWord(); }
