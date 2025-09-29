@@ -16,8 +16,56 @@ window.dataLayer = window.dataLayer || [];
 
 
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
+  navigator.serviceWorker
+    .register("/service-worker.js")
+    .then((registration) => {
+      // Listen for updates
+      registration.onupdatefound = () => {
+        const newWorker = registration.installing;
+        newWorker.onstatechange = () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            // 🚨 A new version is ready!
+            showUpdateBanner(newWorker);
+          }
+        };
+      };
+    });
+}
+
+function showUpdateBanner(worker) {
+  const banner = document.createElement("div");
+  banner.innerHTML = `
+    ✨ A new version is available.
+    <button id="updateBtn" style="
+      margin-left:10px;
+      background:#28a745;
+      color:#fff;
+      border:none;
+      padding:6px 12px;
+      border-radius:6px;
+      cursor:pointer;
+    ">Update</button>
+  `;
+  banner.style.cssText = `
+    position:fixed;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#333;
+    color:#fff;
+    padding:10px 20px;
+    border-radius:8px;
+    z-index:9999;
+    font-size:14px;
+  `;
+
+  document.body.appendChild(banner);
+
+  document.getElementById("updateBtn").addEventListener("click", () => {
+    worker.postMessage("skipWaiting"); // tell SW to activate new one
+    window.location.reload();          // reload app with new files
+  });
+}
 
 
 
